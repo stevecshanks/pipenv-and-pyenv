@@ -1,3 +1,4 @@
+PYTHON = .python.installed
 VIRTUALENV = .virtualenv.installed
 
 .PHONY: dev
@@ -10,9 +11,13 @@ test: $(VIRTUALENV)
 
 .PHONY: clean
 clean:
-	rm -f $(VIRTUALENV)
+	rm -f $(VIRTUALENV) $(PYTHON)
 	pipenv --rm
 
-$(VIRTUALENV): Pipfile
-	pipenv install --dev
+$(VIRTUALENV): Pipfile $(PYTHON)
+	pipenv install --dev --python $(shell pyenv which python)
+	touch -m $@
+
+$(PYTHON): .python-version
+	(pyenv versions | grep -q $(shell cat .python-version)) || pyenv install $(shell cat .python-version)
 	touch -m $@
